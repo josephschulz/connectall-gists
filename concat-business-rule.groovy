@@ -16,8 +16,8 @@ def CONCAT_CONSTANT = "CLONE - "
 def appLinkToApplyRule = ["applink1","applink2","applink3"];
 def appLinkBeingProcessed = message.getSessionProperty('connection.name')
 def destProject = message.getSessionProperty('destination.project')
-dev mappedSrcProject = "CA"
-dev mappedDestProject = "CAPROD"
+dev mappedSrcProject = "RM"
+dev mappedDestProject = "RMPROD"
 
 // Check to see if the rule is to be applied
 if (appLinkToApplyRule.contains(appLinkBeingProcessed)) {
