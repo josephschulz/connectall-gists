@@ -6,8 +6,8 @@
  * should be used to add custom logic.
  * 
  * @author Joe Schulz
- * @version 1.1
- * @date 02/10/2020
+ * @version 1.2
+ * @date 04/27/2020
  * 
  */
 
@@ -163,9 +163,22 @@ def printPayload(message, String payloadState, boolean showPayloadDetail)
 	// Print the payload detail to the log
 	if (showPayloadDetail) 
 	{ 
-		println "--- START " + payloadState.trim().toUpperCase() + " PAYLOAD -----------------------------------------------";
-		println "Processing message: " + message;
-		println "Processing message payload: " + message.payload;
-		println "--- END " + payloadState.trim().toUpperCase() + " PAYLOAD -------------------------------------------------";
+
+		println "-------------------------------------------------------------------------------";
+		println "START MESSAGE HEADER";
+		println "-------------------------------------------------------------------------------";
+		println "Processing message:";
+		println message;
+		println "-------------------------------------------------------------------------------";
+		println "END " + payloadState.trim().toUpperCase() + " MESSAGE HEADER";
+		println "-------------------------------------------------------------------------------";		
+		println "-------------------------------------------------------------------------------";
+		println "START " + payloadState.trim().toUpperCase() + " PAYLOAD";
+		println "-------------------------------------------------------------------------------";
+		println "Processing message payload:";
+		println message.payload;
+		println "-------------------------------------------------------------------------------";
+		println "END " + payloadState.trim().toUpperCase() + " PAYLOAD";
+		println "-------------------------------------------------------------------------------";
 	}
 }
