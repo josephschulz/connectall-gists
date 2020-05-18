@@ -1,0 +1,202 @@
+/**
+ * ConnectALL Custom Business Rule Template
+ * 
+ * This is a template for a ConnectALL custom business rule.  It includes the basic logic to
+ * filter messages based on specified criteria and includes a placeholder where custom logic
+ * should be added.
+ * 
+ * @author Joe Schulz
+ * @version 1.5
+ * @date 05/18/2020
+ * 
+ */
+
+///////////////////////////////////////////////////////////////////////
+// SET THE FILTER CRITERIA
+//
+//   appLinkName   - specifies the ConnectALL display name for the application link object
+//                   e.g. "ServiceNowIncident2JiraBug"
+//   sourceAppKey  - specifies the source application key
+//                   e.g. "servicenow", "generic-jira", "msvststfs", "hp"
+//   sourceLinkID  - specifies the fully qualified ConnectALL Source Link ID
+//                   e.g. "ServiceNowIncident2JiraBug_1234567890"
+//   destLinkID    - specifies the fully qualified ConnectALL Destination Link ID
+//                   e.g. "ServiceNowIncident2JiraBug_0987654321"
+//   destURL       - specifies the fully qualified URL of the target server
+//                   e.g. "http://myjira.com"
+//   destProject   - specifies the destination Project Name
+//                   e.g. "MyProjectName"
+//   destIssueType - specifies the destination Object Type ID
+//                   e.g. "incident", "10102", "Bug", "defect"
+//
+// For each criteria, specify a single quoted value, a comma-separated list of quoted
+// values, or the word "*ALL".  Each value must be enclosed by square brackets.  
+// 		e.g. ["value1"]
+// 		e.g. ["value1", "value2"]
+// 		e.g. ["*ALL"]
+//
+///////////////////////////////////////////////////////////////////////
+String appLinkName = ["*ALL"];
+String sourceAppKey = ["*ALL"];
+String sourceLinkID = ["*ALL"];
+String destLinkID = ["*ALL"];
+String destURL = ["*ALL"];
+String destProject = ["*ALL"];
+String destIssueType = ["*ALL"];
+
+///////////////////////////////////////////////////////////////////////
+// SET THE DEBUG PROPERTIES
+///////////////////////////////////////////////////////////////////////
+boolean showPayloadDetail = true;
+
+println "*******************************************************************************";
+println "BEGIN BusinessRuleTemplate.groovy";
+println "*******************************************************************************";
+printPayload(message, "ORIGINAL", showPayloadDetail);
+println "Executing custom business rule BusinessRuleTemplate.groovy";
+
+// Check whether the current message matches the filter criteria
+if (matchingMessage(message, appLinkName, sourceAppKey, sourceLinkID, destLinkID, destURL, destProject, destIssueType))
+{
+	///////////////////////////////////////////////////////////////////////
+	// ADD CUSTOM LOGIC BELOW
+	///////////////////////////////////////////////////////////////////////
+	// Set the new value in the source field
+	//def oldValue = message.payload.getSingleValueField("XXX");
+	//println "Field XXX old value: [" + oldValue + "]";
+	//def newValue = "YYY";
+	//message.payload.setSingleValueField("XXX", newValue);
+	//println "Field XXX changed to: [" + message.payload.getSingleValueField("XXX") + "]";
+	//printPayload(message, "UPDATED", showPayloadDetail);
+	println "No logic defined, default mappings used";
+}
+
+println "*******************************************************************************";
+println "END BusinessRuleTemplate.groovy";
+println "*******************************************************************************";
+
+return message.payload;
+
+///////////////////////////////////////////////////////////////////////
+// NO NEED TO CHANGE ANYTHING BELOW THIS POINT
+///////////////////////////////////////////////////////////////////////
+
+/**
+ * Check for matching messages
+ *
+ * This function determines whether the current message meets the specified filtering criteria.
+ * If so, it returns a value of true.  Otherwise, it returns a value of false.
+ *
+ * @returns boolean
+ *
+ */
+def matchingMessage(Object message, String appLinkName, String sourceAppKey, String sourceLinkID, 
+	String destLinkID, String destURL, String destProject, String destIssueType)
+{
+	// Get the current application link
+	println "Looking for Application Link Name: " + appLinkName;
+	String result = message.getSessionProperty('connection.name').trim();
+	println "Found Application Link Name: [" + result + "]";
+
+	// Check whether the desired application link was found
+	if (appLinkName.contains("*ALL") || appLinkName.contains(result))
+	{
+		// Get the current source app key
+		println "Looking for Source Application Key: " + sourceAppKey;
+		result = message.getSessionProperty('source.appmodel').getApplicationKey();
+		println "Found Source Application Key: [" + result + "]";
+		
+		// Check whether the desired source app key was found
+		if (sourceAppKey.contains("*ALL") || sourceAppKey.contains(result))
+		{
+			// Get the current source link
+			println "Looking for Source Link ID: " + sourceLinkID;
+			result = message.getSessionProperty("source").trim();
+			println "Found Source Link ID: [" + result + "]";
+			
+			// Check whether the desired source link was found
+			if (sourceLinkID.contains("*ALL") || sourceLinkID.contains(result))
+			{
+				// Get the current destination link
+				println "Looking for Destination Link ID: " + destLinkID;
+				result = message.getSessionProperty("destination").trim();
+				println "Found Destination Link ID: [" + result + "]";
+	
+				// Check whether the desired destination link was found
+				if (destLinkID.contains("*ALL") || destLinkID.contains(result))
+				{
+					// Get the current URL
+					println "Looking for Destination URL: " + destURL;
+					String foundURL = message.getSessionProperty('url').trim();
+					println "Found Destination URL: [" + foundURL + "]";
+	
+					// Check whether the desired destination URL was found
+					if (destURL.contains("*ALL") || destURL.contains(foundURL))
+					{
+						// Get the current project
+						println "Looking for Destination Project: " + destProject;
+						try {
+						   result = message.getSessionProperty("destination.project").trim();
+						   println "Found Destination Project: [" + result + "]";
+						} catch(Exception e) {
+						   result = "*INVALID";
+						   println "[" + foundURL + "] is not a project-based destination";
+						}
+	
+						// Check whether the desired project was found
+						if (destProject.contains("*ALL") || destProject.contains(result))
+						{
+							// Get the current issue type
+							println "Looking for Issue Type: " + destIssueType;
+							try {
+							   result = message.payload.getIssueType().trim();
+							   println "Found Destination Issue Type: [" + result + "]";
+							} catch(Exception e) {
+	     					   result = "*INVALID";
+							   println "[" + foundURL + "] is not an issue-based destination";
+							}						
+							
+							// Check whether the desired issue type was found
+							if (destIssueType.contains("*ALL") || destIssueType.contains(result))
+							{
+								println "Message matches filter criteria";
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	println "Message does not match filter criteria";
+	return false;
+}
+
+/**
+ * Print Message Payload
+ *
+ * This function prints the contents of the current message and payload.
+ *
+ */
+def printPayload(Object message, String payloadState, boolean showPayloadDetail)
+{
+	// Print the payload detail to the log
+	if (showPayloadDetail) 
+	{ 
+		println "-------------------------------------------------------------------------------";
+		println "START MESSAGE HEADER";
+		println "-------------------------------------------------------------------------------";
+		println message;
+		println "-------------------------------------------------------------------------------";
+		println "END MESSAGE HEADER";
+		println "-------------------------------------------------------------------------------";
+		println "-------------------------------------------------------------------------------";
+		println "START " + payloadState.trim().toUpperCase() + " PAYLOAD";
+		println "-------------------------------------------------------------------------------";
+		println message.payload;
+		println "-------------------------------------------------------------------------------";
+		println "END " + payloadState.trim().toUpperCase() + " PAYLOAD";
+		println "-------------------------------------------------------------------------------";
+	}
+}
